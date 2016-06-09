@@ -6,6 +6,7 @@
 #include <ESP8266HTTPUpdateServer.h>
 
 #define RELAYPIN 2
+bool debug = false;
 
 const char* host = "outlet";
 const char* ssid = "SSID";
@@ -14,6 +15,7 @@ const char* password = "PASSWORD";
 const char *ESPssid = "I'm an outlet";
 const char *ESPpassword = "PASSWORD";
 
+
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
@@ -21,7 +23,7 @@ long timer;
 byte fails = 0;
 
 void setup() {
-  Serial.begin(115200);
+  if (debug)Serial.begin(115200);
   delay(10);
 
   pinMode(RELAYPIN, OUTPUT);
@@ -34,7 +36,7 @@ void setup() {
 
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     WiFi.begin(ssid, password);
-    Serial.println("WiFi failed, retrying.");
+    if (debug)Serial.println("WiFi failed, retrying.");
   }
 
   MDNS.begin(host);
@@ -43,13 +45,13 @@ void setup() {
   httpServer.begin();
 
   MDNS.addService("http", "tcp", 80);
-  Serial.printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
+  if (debug)  Serial.printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
 
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  if (debug)  Serial.println("");
+  if (debug)  Serial.println("WiFi connected");
+  if (debug)  Serial.println("IP address: ");
+  if (debug) Serial.println(WiFi.localIP());
 
   delay(500);
 }
@@ -64,28 +66,32 @@ void loop() {
   delay(1);
 
   if (timer + 30000 < millis()) {
-    Serial.print("connecting to ");
-    Serial.println(host);
+    if (debug) Serial.print("connecting to ");
+    if (debug) Serial.println(host);
 
     // Use WiFiClient class to create TCP connections
     WiFiClient client;
 
     if (!client.connect(host, port)) {
-      Serial.println("connection failed");
+      if (debug) Serial.println("connection failed");
       fails = fails + 1;
-      if (fails >= 2) {
+      if (debug) Serial.println (fails);
+      if (fails >= 3) {
 
         digitalWrite(RELAYPIN, LOW);  // OFF
-        Serial.println("Turning off, waiting 5 sec...");
+        if (debug) Serial.println("Turning off, waiting 5 sec...");
         delay(5000);
         digitalWrite(RELAYPIN, HIGH);  // ON
-        Serial.println("Tuning on, waiting 130 sec...");
+        if (debug) Serial.println("Tuning on, waiting 130 sec...");
         delay(130000);
-        fails == 0;
+        fails = 0;
       }
       return;
     }
-
+    if (client.connect(host, port)) {
+      fails = 0;
+    }
+    if (debug) Serial.println (fails);
     // This will send the request to the server
     client.print("Send this data to server");
 
@@ -93,10 +99,10 @@ void loop() {
     String line = client.readStringUntil('\r');
     client.println(line);
     digitalWrite(RELAYPIN, HIGH);
-    Serial.println("closing connection");
+    if (debug) Serial.println("closing connection");
     client.stop();
 
-    Serial.println("wait 30 sec...");
+    if (debug) Serial.println("wait 30 sec...");
     timer = millis();
   }
   //  delay(30000);
