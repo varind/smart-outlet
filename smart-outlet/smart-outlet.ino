@@ -18,6 +18,7 @@ ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
 long timer;
+byte fails = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -71,12 +72,17 @@ void loop() {
 
     if (!client.connect(host, port)) {
       Serial.println("connection failed");
-      digitalWrite(RELAYPIN, LOW);  // OFF
-      Serial.println("Turning off, waiting 5 sec...");
-      delay(5000);
-      digitalWrite(RELAYPIN, HIGH);  // ON
-      Serial.println("Tuning on, waiting 130 sec...");
-      delay(130000);
+      fails = fails + 1;
+      if (fails >= 2) {
+
+        digitalWrite(RELAYPIN, LOW);  // OFF
+        Serial.println("Turning off, waiting 5 sec...");
+        delay(5000);
+        digitalWrite(RELAYPIN, HIGH);  // ON
+        Serial.println("Tuning on, waiting 130 sec...");
+        delay(130000);
+        fails == 0;
+      }
       return;
     }
 
@@ -95,4 +101,3 @@ void loop() {
   }
   //  delay(30000);
 }
-
