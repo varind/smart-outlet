@@ -8,11 +8,11 @@
 #define RELAYPIN 2
 
 const char* host = "outlet";
-const char* ssid = "What's Really Good?";
-const char* password = "sausages";
+const char* ssid = "SSID";
+const char* password = "PASSWORD";
 
 const char *ESPssid = "I'm an outlet";
-const char *ESPpassword = "sausages";
+const char *ESPpassword = "PASSWORD";
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
