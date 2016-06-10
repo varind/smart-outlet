@@ -39,6 +39,7 @@ void setup() {
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     WiFi.begin(ssid, password);
     if (debug)Serial.println("WiFi failed, retrying.");
+    delay(100);
   }
 
   MDNS.begin(host);
